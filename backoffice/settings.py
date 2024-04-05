@@ -32,6 +32,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'users',
+    'rest_framework',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -81,6 +84,7 @@ DATABASES = {
         'USER':  os.environ.get('DB_USER'),
         'PASSWORD':  os.environ.get('DB_USER_PASSWORD'),
         'HOST':  os.environ.get('DB_HOST'),
+        'PORT': '5432',
     }
 }
 
@@ -125,3 +129,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'users.User'
