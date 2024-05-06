@@ -32,21 +32,27 @@ class RegisterView(generics.GenericAPIView):
     def post(self,request):
         user =request.data
         serializer = self.serializer_class(data=user)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        user_data = serializer.data
-        user = User.objects.get(email=user_data['email'])
-        token = RefreshToken.for_user(user).access_token
-        domain = get_current_site(request).domain
-        relativeLink = reverse('email-verify')
-        absURL = 'http://'+domain+relativeLink+"?token="+str(token)
-        # absURL = f'http://{domain}{relativeLink}?token={token}'
-        email_body = 'Hi '+user.name + \
-        ' Use the link below to verify your email \n'+absURL
-        data = {'email_body': email_body, 'to_email': user.email, 'email_subject':  'Verify Your Email'}
-        Util.send_email(data)
-        return Response(user_data,status=status.HTTP_201_CREATED)
-
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            user_data = serializer.data
+            user = User.objects.get(email=user_data['email'])
+            token = RefreshToken.for_user(user).access_token
+            domain = get_current_site(request).domain
+            relativeLink = reverse('email-verify')
+            absURL = 'http://'+domain+relativeLink+"?token="+str(token)
+            # absURL = f'http://{domain}{relativeLink}?token={token}'
+            email_body = 'Hi '+user.name + \
+            ' Use the link below to verify your email \n'+absURL
+            data = {'email_body': email_body, 'to_email': user.email, 'email_subject':  'Verify Your Email'}
+            Util.send_email(data)
+            return Response(user_data,status=status.HTTP_201_CREATED)
+        else:
+            errors = serializer.errors
+            error_messages = []
+            for field, messages in errors.items():
+                for message in messages:
+                    error_messages.append({"field": field, "message": message})
+            return Response({"errors": error_messages}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -173,12 +179,6 @@ class ProfileAPIView(generics.GenericAPIView):
 
 
     
-# class CustomTokenRefreshView(TokenRefreshView):
-#     def post(self, request , *args, **kwargs):
-#         refresh_token = request.COOKIES.get('refresh_token')
-#         if refresh_token:
-#             request.data['refresh'] = refresh_token
-#         return super().post(request, *args, **kwargs)
 
 
 class CustomTokenRefreshView(APIView):

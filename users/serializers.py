@@ -1,3 +1,4 @@
+from rest_framework import  status  
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import AuthenticationFailed
@@ -27,7 +28,7 @@ class RegisterSerializer(serializers.ModelSerializer):
       password = attrs.get('password')
 
       if User.objects.filter(email=email).exists():
-          raise serializers.ValidationError("Email address already exists")
+          raise serializers.ValidationError("Email address llllll already exists", status=status.HTTP_403_FORBIDDEN)
 
       if len(password) < 8:
           raise serializers.ValidationError("Password is too short")
