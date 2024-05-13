@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include 
+from django.conf import settings
+from django.conf.urls.static import static
 
 # from drf-yasg swagger
 from django.urls import re_path
@@ -29,6 +31,9 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     path('admin/', admin.site.urls),
-    path('api/', include('users.urls'))
+    path('api/users/', include('users.urls')),
+    path('api/customers/', include('customers.urls')),
+    path('api/services/', include('services.urls')),
+    path('api/invoices/', include('invoices.urls'))
     
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -139,5 +139,12 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','name', 'email']
+        fields = ['id', 'name', 'email']
 
+class UsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','name', 'email', 'date_joined']
+
+
+  

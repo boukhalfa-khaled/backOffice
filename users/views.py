@@ -1,4 +1,5 @@
 from rest_framework import generics , status , views
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView  
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
@@ -20,7 +21,7 @@ from drf_yasg import openapi
 
 from .utils import Util
 from .models import User
-from .serializers import RegisterSerializer, EmailVerificationSerializer ,LoginSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer, LogoutSerializer, ProfileSerializer
+from .serializers import RegisterSerializer, EmailVerificationSerializer ,LoginSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer, LogoutSerializer, ProfileSerializer, UsersSerializer
 from django.conf import settings
 from django.shortcuts import redirect
 import os
@@ -71,7 +72,7 @@ class VerifyEmail(views.APIView):
             if not user.is_verified:
                 user.is_verified = True
                 user.save()
-                return redirect(os.environ.get('FRONTEND_URL', '') + 'login' + '?message=Succesfully Activated' )
+                return redirect(os.environ.get('FRONTEND_URL', '') + 'auth/signin' + '?message=Acount Succesfully Activated Please Login to Proced' )
                 # return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
             return Response({'email': 'Account Already activated'}, status=status.HTTP_200_OK)
         except jwt.ExpiredSignatureError as identifier:
@@ -128,16 +129,16 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
             if not PasswordResetTokenGenerator().check_token(user,token):
                 # if len(redirect_url)>3:
                     # return redirect(redirect_url+'?token_valid=False')
-                return redirect(os.environ.get('FRONTEND_URL', '')+ 'NewPassword/' +'?token_valid=false')
+                return redirect(os.environ.get('FRONTEND_URL', '')+ 'auth/signin' +'?error=Something Went Wrong')
 
 
-            return redirect(os.environ.get('FRONTEND_URL', '') + 'NewPassword/' + '?token_valid=true&message=CredentialsValid&uidb64=' + uidb64 + '&token=' + token)
+            return redirect(os.environ.get('FRONTEND_URL', '') + 'auth/new-password' + '?uidb64=' + uidb64 + '&token=' + token)
             # return redirect(os.environ.get('FRONTEND_URL', '')+'?token_valid=True&?message=CredentialsValid&?uidb64='+uidb64+'&?token='+token)
 
                 # return Response({'error', 'Token is not validl please request a new one'},status=status.HTTP_401_UNAUTHORIZED)
             # return Response({'success':True, 'message':'Credentials Valide','uidb64':uidb64, 'token':token }, status=status.HTTP_200_OK)
         except DjangoUnicodeDecodeError as identifier:
-                return redirect(os.environ.get('FRONTEND_URL', '')+ 'NewPassword/' +'?token_valid=false')
+                return redirect(os.environ.get('FRONTEND_URL', '')+ 'auth/signin' +'?error=Link Expired Please Request A New One')
                 # return Response({'error', 'Token is not validl please request a new one'},status=status.HTTP_401_UNAUTHORIZED)
 
 class SetNewPasswordAPIView(generics.GenericAPIView):
@@ -150,7 +151,7 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
 
 class LogoutAPIView(generics.GenericAPIView):
     serializer_class = LogoutSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    # permission_classes = (permissions.IsAuthenticated,)
     def post (self, request):
         refresh_token = request.data.get('refresh_token')
         if not refresh_token:
@@ -178,7 +179,24 @@ class ProfileAPIView(generics.GenericAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+# class UserAPIView(generics.RetrieveAPIView):
+#     queryset = User.objects.all()  
+#     serializer_class = UsersSerializer
+#     permission_classes = (permissions.IsAuthenticated,)
+#     lookup_field  = 'id'
+
+
+
+# class UsersAPIView(generics.GenericAPIView):
+#     serializer_class = UsersSerializer
+#     permission_classes = (permissions.IsAuthenticated,)
+    # def get(self, request):
+    #     users = User.objects.all()  
+    #     serializer = self.serializer_class(users, many=True)  
+    #     return Response(serializer.data, status=status.HTTP_200_OK) 
+
     
+
 
 
 class CustomTokenRefreshView(APIView):
@@ -197,4 +215,18 @@ class CustomTokenRefreshView(APIView):
 
 
 
+class UsersListAPIView(ListCreateAPIView):
+    serializer_class = UsersSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = User.objects.all()
+
+
+class UsersDetailAPIView(RetrieveUpdateDestroyAPIView):
+    serializer_class = UsersSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = User.objects.all()
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        return self.queryset
 

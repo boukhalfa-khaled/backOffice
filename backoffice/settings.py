@@ -36,6 +36,9 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'users',
+    'customers',
+    'services',
+    'invoices',
 
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
@@ -200,6 +203,9 @@ DEFAULT_FROM_EMAIL= os.environ.get("EMAIL_HOST_USER")
 EMAIL_PORT= 587
 EMAIL_HOST_PASSWORD= os.environ.get("EMAIL_HOST_PASSWORD")
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
